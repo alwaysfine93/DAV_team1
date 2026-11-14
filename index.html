@@ -1,320 +1,905 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>놀 시간 · 장소 · 경로 추천</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>놀시간 & 화성시 놀이 장소 플래너</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    body {background:#f7fbff;font-family:'Malgun Gothic',Arial,sans-serif;}
-    .app-wrap {max-width:410px;margin:24px auto 18px;border:2px solid #203157;border-radius:28px;background:#fff;box-shadow:0 7px 32px rgba(44,54,64,.13);}
-    .screen {display:none;}
-    .screen.active {display:block;}
-    .mobile-bar {height:40px; border-radius:20px 20px 0 0; background:#fff;border-bottom:1.6px solid #e3ecf4; display:flex; align-items:center; justify-content:space-between; padding:0 18px;}
-    .scr-title {font-size:19px;color:#233;font-weight:bold;}
-    .fn-tag {background:#ffe082;color:#795000;font-size:15px;font-weight:bold;border-radius:50%;border:1.2px solid #f2c100;padding:2px 12px;margin-left:7px;}
-    .area{padding:14px 19px 13px 19px;margin:12px 8px 12px 8px;border:1.3px dashed #7cb7ef; border-radius:12px; background:#f7fbff;}
-    .name-row {margin:18px 0 13px 0;display:flex;align-items:center;}
-    .name-ico {width:46px; height:46px; border-radius:50%; background:#e3eaf0; margin-right:13px;
-      display:flex;align-items:center;justify-content:center;font-size:25px;}
-    .name-inp {font-size:19px; font-weight:bold; border:none; border-bottom:1.5px solid #959ec8;
-      outline:none;width:77%;background:transparent;color:#29405b;}
-    .main-msgbtn {display:block;width:100%;font-size:17px;padding:12px 0;margin:12px 0 7px 0;
-      border-radius:8px;border:none;}
-    .now-notice {background:#ef5350;color:#fff;font-size:17px;margin:7px 0;padding:10px;border-radius:8px;}
-    .study-notice {background:#d32f2f;color:#fff;font-size:16px;padding:8px;border-radius:7px;margin:2px 0 8px;}
-    .ok-msg {background:#4caf50;color:#fff;font-weight:bold;}
-    .list-btn {background:#1976d2;color:#fff;}
-    .rest-msg {background:#eafbe1;color:#528435;font-size:15px;padding:8px 10px;border-radius:7px;margin:5px 0;}
-    .menu-bar {display: flex; justify-content: space-between; background: #e0f1db; border-radius: 0 0 19px 19px; padding: 6px 17px 8px 17px; font-size: 16px; font-weight:bold; color: #43632e;margin:0;}
-    .menu-bar button{background:none;border:none;color:inherit;font:inherit;cursor:pointer;}
-    .tab-link{color:#8eaf6d;}
-    .backbtn{font-size:15px;background:none;border:none;color:#4282d6;margin-bottom:7px;cursor:pointer;}
-    .selectbox{width:100%; font-size:17px; padding:7px; border-radius:8px; border:1.3px solid #aac;}
-    .place-btn{background:#1976d2;color:#fff;font-size:18px;width:100%;padding:13px 0;margin:9px 0 7px 0;border-radius:8px;border:none;}
-    .rand-place {background:#ffe082;color:#425109;padding:5px 10px;border-radius:7px; font-weight:bold;display:inline-block;}
-    .place-list {font-size:16px;margin:8px 0 6px 2px;}
-    .place-li {border-bottom: 1px dashed #bae;border-radius:3px;padding:3px;}
-    .guideimg{color:#bababa;text-align:center;margin:14px;}
-    .urlbox{margin:15px 0 0 0; word-break:break-all; font-size:15px;}
-    .dest-label{background:#efefef; color:#333; font-size:15px; padding:4px 6px; border-radius:6px; margin:0;}
-    .route-btn{background:#ef5350; color:#fff; border:none; font-size:17px;width:100%;padding:12px;margin:13px 0 7px 0;border-radius:8px;}
-    @media (max-width:450px) {.app-wrap{max-width:99vw}.area{padding:7px;}}
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
-<body>
-  <div class="app-wrap">
-    <!-- Home/메인 -->
-    <div id="screen_home" class="screen active">
-      <div class="mobile-bar"><span class="scr-title">홈</span></div>
-      <div class="area">
-        <div class="name-row">
-          <div class="name-ico">👤</div>
-          <input type="text" id="userName" class="name-inp" placeholder="이름" maxlength="8" oninput="saveName()" autocomplete="off">
+<body class="min-h-screen flex flex-col pb-24">
+
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3.5">
+    <div class="max-w-3xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
-        <button id="btn_now" class="main-msgbtn now-notice" disabled>지금은 놀 수 있는 시간이 아닙니다</button>
-        <div id="time_left" class="rest-msg"></div>
-        <button id="btn_study" class="main-msgbtn study-notice" style="display:none;" disabled>지금은 공부할 시간입니다</button>
-        <div id="study_left" class="rest-msg" style="display:none;"></div>
-        <button class="main-msgbtn list-btn" onclick="moveScreen('playtime')">놀 장소 찾기</button>
-      </div>
-      <div class="menu-bar">
-        <span>홈</span><span>공부 계획</span><span>놀 장소</span><span>최적경로</span>
-      </div>
-    </div>
-    <!-- 놀 시간 찾기 (F1) -->
-    <div id="screen_playtime" class="screen">
-      <div class="mobile-bar"><span class="scr-title">놀 시간 찾기</span> <span class="fn-tag">F1</span></div>
-      <div class="area" style="margin-top:13px;">
-        <b>총 놀 수 있는 시간은: <span id="total_playtime"></span></b>
-        <ul id="list_free" style="margin:14px 0 5px 0; padding-left:21px; font-size:16px;"></ul>
-        <div id="now_labelbox"></div>
-        <button class="main-msgbtn list-btn" onclick="moveScreen('place')">놀 장소 추천으로 이동</button>
-      </div>
-      <div class="menu-bar">
-        <button class="tab-link" onclick="moveScreen('home')">홈</button>
-        <span>공부 계획</span>
-        <span>놀 장소</span>
-        <span>최적경로</span>
-      </div>
-    </div>
-    <!-- 놀이 장소 추천 (F6) -->
-    <div id="screen_place" class="screen">
-      <div class="mobile-bar"><span class="scr-title">놀이 장소 추천</span> <span class="fn-tag">F6</span></div>
-      <div class="area">
-        <button class="backbtn" onclick="moveScreen('playtime')">돌아가기</button>
-        <div style="font-size:14px;color:#666;">고르기에서 장소를 고르시면 놀이 장소를 추천해드립니다.</div>
-        <select id="catSel" class="selectbox" style="margin:9px 0 12px 0;" onchange="listPlaces()">
-          <option value="" hidden>고르기</option>
-        </select>
-        <button class="place-btn" onclick="pickRandomPlace()">놀이 장소 추천 찾기</button>
-        <div id="rec_placebox" class="place-list"></div>
-        <div class="guideimg">그림 · 사진</div>
-        <button class="main-msgbtn list-btn" style="margin-top:14px;" onclick="moveScreen('route')">최적 경로 찾기</button>
-      </div>
-      <div class="menu-bar">
-        <button class="tab-link" onclick="moveScreen('home')">홈</button>
-        <button class="tab-link" onclick="moveScreen('playtime')">공부 계획</button>
-        <span>놀 장소</span>
-        <span>최적경로</span>
-      </div>
-    </div>
-    <!-- 최적 경로 찾기 화면 -->
-    <div id="screen_route" class="screen">
-      <div class="mobile-bar"><span class="scr-title">최적 경로 찾기</span> <span class="fn-tag">F3</span></div>
-      <div class="area">
-        <label style="font-size:15px;">출발 장소</label>
-        <input type="text" id="startInput" class="selectbox" placeholder="여기에 입력" autocomplete="off">
-        <div class="dest-label" style="margin:10px 0 4px 0;">
-          목적지(추천 놀이 장소): <b id="destLabel"></b>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">놀시간 플래너</h1>
+          <p class="text-xs text-slate-500">계획 관리 · 빈 시간 계산 · 화성시 놀이 장소 검색 & 경로</p>
         </div>
-        <button class="route-btn" onclick="showNaverRoute()">입력</button>
-        <div class="urlbox" id="routeUrlBox"></div>
       </div>
-      <div class="menu-bar">
-        <button class="tab-link" onclick="moveScreen('home')">홈</button>
-        <button class="tab-link" onclick="moveScreen('playtime')">공부 계획</button>
-        <button class="tab-link" onclick="moveScreen('place')">놀 장소</button>
-        <span>최적경로</span>
-      </div>
+      <span id="storage-badge" class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+        로컬 저장됨
+      </span>
     </div>
-  </div>
+  </header>
+
+  <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md pointer-events-none flex flex-col gap-2"></div>
+
+  <main class="flex-1 w-full max-w-3xl mx-auto px-4 pt-5 space-y-6">
+
+    <section id="tab-home" class="tab-content active space-y-5">
+      <div class="bg-gradient-to-br from-indigo-600 to-blue-600 rounded-2xl p-5 text-white shadow-md">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs font-medium text-indigo-100 uppercase tracking-wider">오늘의 스케줄 & 여유 시간 요약</p>
+            <h2 class="text-xl sm:text-2xl font-bold mt-1">공부 끝내고 어디로 놀러 갈까요?</h2>
+            <p class="text-sm text-indigo-100 mt-1.5">등록된 일정을 분석해 10분 이상의 빈 시간을 자동으로 찾아줍니다.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
+          <div class="bg-white/15 backdrop-blur-sm rounded-xl p-3">
+            <p class="text-xs text-indigo-100">등록된 일정</p>
+            <p id="home-plan-count" class="text-xl font-bold mt-0.5">0개</p>
+          </div>
+          <div class="bg-white/15 backdrop-blur-sm rounded-xl p-3">
+            <p class="text-xs text-indigo-100">놀 수 있는 구간</p>
+            <p id="home-free-count" class="text-xl font-bold mt-0.5">0개</p>
+          </div>
+          <div class="col-span-2 sm:col-span-1 bg-white/15 backdrop-blur-sm rounded-xl p-3">
+            <p class="text-xs text-indigo-100">총 놀 수 있는 시간</p>
+            <p id="home-free-total" class="text-xl font-bold mt-0.5">0분</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <button onclick="switchTab('plan')" class="text-left bg-white p-4 rounded-2xl border border-slate-200 hover:border-indigo-300 hover:shadow-sm transition">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold mb-2.5">1</div>
+          <h3 class="font-bold text-slate-900 text-sm">계획 관리 & 빈 시간</h3>
+          <p class="text-xs text-slate-500 mt-1">과목/할 일과 시작·종료 시간을 입력하고 빈 시간을 계산합니다.</p>
+        </button>
+        <button onclick="switchTab('place')" class="text-left bg-white p-4 rounded-2xl border border-slate-200 hover:border-indigo-300 hover:shadow-sm transition">
+          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold mb-2.5">2</div>
+          <h3 class="font-bold text-slate-900 text-sm">놀이 장소 검색</h3>
+          <p class="text-xs text-slate-500 mt-1">카테고리별 검색어로 화성시 주변 장소를 찾아봅니다.</p>
+        </button>
+        <button onclick="switchTab('route')" class="text-left bg-white p-4 rounded-2xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition">
+          <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold mb-2.5">3</div>
+          <h3 class="font-bold text-slate-900 text-sm">경로 안내</h3>
+          <p class="text-xs text-slate-500 mt-1">출발지와 목적지를 입력해 네이버 지도 길찾기를 엽니다.</p>
+        </button>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-slate-900 text-base">오늘 놀 수 있는 시간 (10분 이상)</h3>
+          <button onclick="switchTab('plan')" class="text-xs font-semibold text-indigo-600 hover:underline">일정 수정 →</button>
+        </div>
+        <div id="home-free-list" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <section id="tab-plan" class="tab-content space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">F4 계획 관리</span>
+            <h2 class="text-lg font-bold text-slate-900 mt-1">할 일(과목) 및 시간 입력</h2>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="loadSamplePlans()" class="text-xs px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">예시 일정 불러오기</button>
+            <button type="button" onclick="clearAllPlans()" class="text-xs px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium transition">전체 삭제</button>
+          </div>
+        </div>
+
+        <form id="plan-form" class="space-y-3.5" onsubmit="handleAddPlan(event)">
+          <div>
+            <label for="plan-content" class="block text-xs font-semibold text-slate-700 mb-1">할 일 (과목)</label>
+            <input type="text" id="plan-content" placeholder="예: 학교, 수학 학원, 영어 숙제 (입력 종료는 '끝' 입력 또는 입력 종료 버튼)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="plan-start" class="block text-xs font-semibold text-slate-700 mb-1">시작 시간</label>
+              <input type="time" id="plan-start" value="09:00" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label for="plan-end" class="block text-xs font-semibold text-slate-700 mb-1">끝 시간</label>
+              <input type="time" id="plan-end" value="16:00" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+            <button type="submit" class="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition">일정 추가하기</button>
+            <button type="button" onclick="finishPlanInput()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm transition">입력 종료 ('끝') · 최종 표 보기</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="schedule-table-card" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <h3 id="schedule-table-title" class="font-bold text-slate-900 text-base">현재 스케줄 표</h3>
+            <span id="final-badge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">최종 확정 표</span>
+          </div>
+          <span id="schedule-count-badge" class="text-xs text-slate-500">총 0건</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="border-b border-slate-200 text-xs text-slate-500 bg-slate-50">
+                <th class="py-2.5 px-3 rounded-tl-lg">순서</th>
+                <th class="py-2.5 px-3">시간</th>
+                <th class="py-2.5 px-3">할 일 (과목)</th>
+                <th class="py-2.5 px-3 text-right rounded-tr-lg">관리</th>
+              </tr>
+            </thead>
+            <tbody id="plan-table-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-indigo-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">F1 놀 수 있는 시간 찾기</span>
+            <h3 class="font-bold text-slate-900 text-base mt-1">오늘 놀 수 있는 시간</h3>
+          </div>
+          <button type="button" onclick="switchTab('place')" class="text-xs font-semibold px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition">놀이 장소 고르러 가기 →</button>
+        </div>
+        <p class="text-xs text-slate-500 mb-3">※ 00:00 ~ 23:59 기준, 등록된 일정과 겹치지 않는 <strong>10분 이상</strong>의 여유 시간만 표시합니다.</p>
+        <div id="free-time-list" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <section id="tab-place" class="tab-content space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">카카오 장소 검색</span>
+            <h2 class="text-lg font-bold text-slate-900 mt-1">화성시 놀이 장소 검색</h2>
+          </div>
+          <button type="button" onclick="recommendRandomPlace()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition">
+            ✨ 검색 결과에서 랜덤 추천
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-500 leading-relaxed">
+          카테고리를 선택하면 해당 검색어로 장소를 찾습니다. 검색 API는 장소 정보를 제공하며, 길찾기는 네이버 지도에서 확인합니다.
+        </p>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-2">장소 종류를 선택하세요</label>
+          <div id="category-buttons" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <form id="place-search-form" class="flex gap-2" onsubmit="searchPlaces(event)">
+          <label for="place-query" class="sr-only">장소 검색어</label>
+          <input id="place-query" type="search" maxlength="80" placeholder="예: 동탄 공원" class="min-w-0 flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <button id="place-search-button" type="submit" class="shrink-0 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold">검색</button>
+        </form>
+
+        <p id="place-search-status" class="text-xs text-slate-500" aria-live="polite"></p>
+
+        <div id="ai-recommend-box" class="hidden rounded-2xl bg-violet-50 border border-violet-200 p-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="inline-block text-[11px] font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded-md mb-1">검색 결과 랜덤 추천 (선택은 자유입니다!)</span>
+              <h4 id="ai-rec-name" class="text-base font-bold text-slate-900"></h4>
+              <p id="ai-rec-gps" class="text-xs text-slate-600 mt-0.5"></p>
+              <p id="ai-rec-info" class="text-xs text-violet-800 mt-1"></p>
+            </div>
+            <button id="ai-rec-select-btn" type="button" class="shrink-0 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-sm transition">이 장소로 경로 찾기 →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 id="place-list-title" class="font-bold text-slate-900 text-base">검색 결과</h3>
+          <span id="place-list-count" class="text-xs font-medium text-slate-500">0개</span>
+        </div>
+        <div id="place-cards-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        <button id="load-more-button" type="button" onclick="loadNextPlacePage()" class="hidden mt-4 w-full py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          다음 검색 결과 더 보기
+        </button>
+      </div>
+    </section>
+
+    <section id="tab-route" class="tab-content space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div>
+          <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full">F3 경로 안내</span>
+          <h2 class="text-lg font-bold text-slate-900 mt-1">출발지 & 목적지 경로 안내</h2>
+          <p class="text-xs text-slate-500 mt-0.5">장소 검색 결과를 선택하면 목적지가 자동 입력됩니다. 출발지를 입력해 주세요.</p>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label for="route-start" class="block text-xs font-semibold text-slate-700 mb-1">출발지 (현재 위치 또는 공부 장소)</label>
+            <input type="text" id="route-start" placeholder="예: 동탄중앙이음터도서관, 병점역" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label for="route-end" class="block text-xs font-semibold text-slate-700 mb-1">목적지 (놀이 장소)</label>
+            <input type="text" id="route-end" placeholder="장소 검색 탭에서 선택하거나 직접 입력하세요" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <p id="route-end-address" class="text-xs text-slate-500 mt-1"></p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <button type="button" onclick="calculateAndShowRoute()" class="py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition">장소 지도에서 확인하기</button>
+            <button type="button" onclick="openNaverDirections()" class="py-3 px-4 rounded-xl bg-[#03C75A] hover:bg-[#02b351] text-white font-semibold text-sm shadow-sm transition">네이버 지도 길찾기 (새 창 열기)</button>
+          </div>
+        </div>
+
+        <div id="naver-url-box" class="hidden rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-1.5">
+          <p class="text-xs font-semibold text-slate-700">[네이버 지도 경로 검색 URL]</p>
+          <a id="naver-url-link" href="#" target="_blank" rel="noopener noreferrer" class="block text-xs text-emerald-700 font-medium break-all underline"></a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+        <h3 class="font-bold text-slate-900 text-base">장소 지도 미리보기 (카카오맵)</h3>
+        <p class="text-xs text-slate-500">이 미리보기는 장소 검색 페이지를 엽니다. 앱 안에서 경로를 계산하는 기능은 제공하지 않습니다.</p>
+        <div class="w-full h-72 sm:h-80 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+          <iframe
+            id="place-map-frame"
+            title="카카오맵 장소 미리보기"
+            class="w-full h-full border-0"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://map.kakao.com/"
+          ></iframe>
+        </div>
+        <a id="place-map-open-link" href="https://map.kakao.com/" target="_blank" rel="noopener noreferrer" class="inline-flex text-sm font-semibold text-emerald-700 underline">
+          카카오맵에서 열기
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg">
+    <div class="max-w-3xl mx-auto grid grid-cols-4 h-16">
+      <button type="button" data-tab="home" onclick="switchTab('home')" class="nav-btn flex flex-col items-center justify-center gap-1 text-indigo-600 font-semibold transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
+        </svg>
+        <span class="text-[11px]">홈</span>
+      </button>
+      <button type="button" data-tab="plan" onclick="switchTab('plan')" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-slate-900 font-medium transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+        <span class="text-[11px]">계획 관리/놀 시간</span>
+      </button>
+      <button type="button" data-tab="place" onclick="switchTab('place')" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-slate-900 font-medium transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0 8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span class="text-[11px]">장소 검색</span>
+      </button>
+      <button type="button" data-tab="route" onclick="switchTab('route')" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-slate-900 font-medium transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        <span class="text-[11px]">경로 안내</span>
+      </button>
+    </div>
+  </nav>
+
   <script>
-    // 저장/불러오기
-    const LS_KEY = 'applog_v3_state';
-    let state = { name:'', plans:[], lastCat:'', lastPlace:'' };
-    function saveAll(){
-      try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
-      catch(e){
-        alert('저장 공간에 저장할 수 없는 환경(Incognito 등)입니다.');
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colorMap = {
+        info: 'bg-slate-900 text-white border-slate-700',
+        success: 'bg-emerald-700 text-white border-emerald-600',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        error: 'bg-rose-600 text-white border-rose-500'
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-medium transition-all ${colorMap[type] || colorMap.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 250);
+      }, 3200);
+    }
+
+    const STORAGE_KEY_PLANS = 'hwaseong_play_planner_plans_v1';
+    const STORAGE_KEY_ROUTE = 'hwaseong_play_planner_route_v1';
+    const STORAGE_KEY_MEMORY_PLANS = 'hwaseong_play_planner_memory_plans_v1';
+    const STORAGE_KEY_MEMORY_ROUTE = 'hwaseong_play_planner_memory_route_v1';
+
+    let storageAvailable = true;
+    let memoryStore = {};
+
+    function safeSaveToStorage(key, value) {
+      try {
+        window.localStorage.setItem(key, JSON.stringify(value));
+        storageAvailable = true;
+        updateStorageBadge(true);
+      } catch (e) {
+        storageAvailable = false;
+        memoryStore[key] = value;
+        updateStorageBadge(false);
       }
     }
-    function loadAll(){
-      try{
-        const s = localStorage.getItem(LS_KEY);
-        if(s) state = JSON.parse(s);
-      }catch{}
+
+    function safeLoadFromStorage(key, fallback) {
+      try {
+        const raw = window.localStorage.getItem(key);
+        if (raw === null) return Object.prototype.hasOwnProperty.call(memoryStore, key) ? memoryStore[key] : fallback;
+        return JSON.parse(raw);
+      } catch (e) {
+        storageAvailable = false;
+        return Object.prototype.hasOwnProperty.call(memoryStore, key) ? memoryStore[key] : fallback;
+      }
     }
-    // 이름 저장
-    function pad(n){return n<10?'0'+n:n;}
-    function saveName(){
-      state.name = document.getElementById('userName').value.trim();
-      saveAll();
+
+    function updateStorageBadge(ok) {
+      const badge = document.getElementById('storage-badge');
+      if (!badge) return;
+      if (ok) {
+        badge.textContent = '로컬 저장됨';
+        badge.className = 'text-[11px] font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+      } else {
+        badge.textContent = '임시 저장 중';
+        badge.className = 'text-[11px] font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200';
+      }
     }
-    // 놀 시간 파이썬 규칙
-    function time2min(str){
-      let [h,m] = str.split(':').map(Number); return h*60+m;
-    }
-    function min2time(m){
-      let h=Math.floor(m/60), mm=m%60;
-      if(h<0) h=0; if(h>23) h=23; if(mm>59) mm=59;if(mm<0) mm=0;
-      return pad(h)+":"+pad(mm);
-    }
+
     function find_free_time(plans) {
-      function t2m(t){let [h,m]=t.split(":").map(Number);return h*60+m;}
-      function m2t(m){let h = Math.floor(m/60), mm = m % 60;return pad(h)+":"+pad(mm);}
-      let sorted_plans = plans.slice().sort((a,b)=>t2m(a.start)-t2m(b.start));
-      let free_times = [], DAY_START=0, DAY_END=24*60-1;
-      let current = DAY_START;
-      for(let plan of sorted_plans){
-        let start = t2m(plan.start), end = t2m(plan.end);
-        if(start > current){
-          let duration = start - current;
-          if(duration >= 10){
-            free_times.push({start:m2t(current), end:m2t(start), duration:duration});
-          }
+      function toMinutes(t) {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      }
+      function toTime(m) {
+        const h = Math.floor(m / 60);
+        const minute = m % 60;
+        return String(h).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+      }
+      const sorted = [...plans].sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
+      const free = [];
+      let current = 0;
+      const dayEnd = 24 * 60;
+      for (const plan of sorted) {
+        const start = toMinutes(plan.start);
+        const end = toMinutes(plan.end);
+        if (start > current && start - current >= 10) {
+          free.push({ start: toTime(current), end: toTime(start), duration: start - current });
         }
         current = Math.max(current, end);
       }
-      if(current <= DAY_END){
-        let duration = DAY_END+1 - current;
-        if(duration >= 10){
-          free_times.push({
-            start: m2t(current),
-            end: m2t(DAY_END+1 <= 24*60-1 ? DAY_END+1 : 24*60-1),
-            duration: duration
-          });
-        }
+      if (current < dayEnd && dayEnd - current >= 10) {
+        free.push({ start: toTime(current), end: '24:00', duration: dayEnd - current });
       }
-      return free_times;
+      return free;
     }
-    function now_in_free(free){
-      let now = new Date();
-      let m = now.getHours()*60 + now.getMinutes();
-      for(let f of free){
-        if(m >= time2min(f.start) && m < time2min(f.end)){
-          return {ok:true, left: time2min(f.end)-m};
-        }
-      }
-      // 공부 구간 찾기
-      let study = state.plans
-        .find(p=>m>=time2min(p.start) && m<time2min(p.end));
-      if(study) return {ok: false, study:true, left:time2min(study.end)-m};
-      let next = free.find(f=>time2min(f.start)>m);
-      if(next) return {ok:false, next:true, left:time2min(next.start)-m};
-      return {ok:false, left:0};
-    }
-    // 화면 전환
-    function moveScreen(n){
-      document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
-      if(n==='home') { renderHome(); document.getElementById('screen_home').classList.add('active'); }
-      if(n==='playtime') { renderPlaytime(); document.getElementById('screen_playtime').classList.add('active'); }
-      if(n==='place') { renderPlaceCats(); document.getElementById('screen_place').classList.add('active'); }
-      if(n==='route') { renderRoute(); document.getElementById('screen_route').classList.add('active'); }
-    }
-    // 홈
-    function renderHome(){
-      document.getElementById('userName').value = state.name||'';
-      let plans = state.plans||[];
-      let free = find_free_time(plans);
-      let res = now_in_free(free);
-      let btn = document.getElementById('btn_now'), tmsg = document.getElementById('time_left');
-      let stbox = document.getElementById('btn_study'), stmsg = document.getElementById('study_left');
-      if(res.ok){
-        btn.textContent = "지금은 놀 수 있는 시간입니다!";
-        btn.className="main-msgbtn ok-msg"; btn.disabled=true;
-        tmsg.textContent="놀 수 있는 시간이 "+Math.floor(res.left/60)+"시간 "+(res.left%60)+"분 남았습니다.";
-        stbox.style.display="none"; stmsg.style.display="none";
-      }else if(res.study){
-        btn.textContent = "지금은 놀 수 있는 시간이 아닙니다";
-        btn.className="main-msgbtn now-notice"; btn.disabled=true;
-        tmsg.textContent="";
-        stbox.textContent= "지금은 공부할 시간입니다";
-        stbox.style.display="block";
-        stmsg.textContent = res.left+"분 더 공부해야 합니다.";
-        stmsg.style.display="block";
-      }else{
-        btn.textContent = "지금은 놀 수 있는 시간이 아닙니다";
-        btn.className="main-msgbtn now-notice"; btn.disabled=true;
-        tmsg.textContent=(res.next&&res.left>0) ?
-          `놀 수 있는 시간까지 ${res.left}분 남았습니다.`:'오늘 일정이 끝났습니다.';
-        stbox.style.display="none"; stmsg.style.display="none";
-      }
-    }
-    // 놀 시간 찾기
-    function renderPlaytime(){
-      let plans = state.plans||[];
-      let free = find_free_time(plans);
-      let total = 0; free.forEach(f=>total+=f.duration);
-      document.getElementById('total_playtime').textContent = Math.floor(total/60)+'시간 '+(total%60)+'분';
-      let ul = document.getElementById('list_free'); ul.innerHTML='';
-      if(free.length==0){
-        ul.innerHTML='<li>빈 시간이 없습니다.</li>';
-      }else{
-        for(let f of free){
-          ul.innerHTML += `<li>${f.start} ~ ${f.end}  (${Math.floor(f.duration/60)}시간 ${f.duration%60}분)</li>`;
-        }
-      }
-      let res = now_in_free(free);
-      let box = document.getElementById('now_labelbox'), html="";
-      if(res.ok){
-        html = `<div class="ok-msg">지금은 놀 수 있는 시간입니다!</div>`;
-      }else if(res.study){
-        html = `<div class="study-notice">지금은 공부해야 합니다 (${res.left}분 남음)</div>`;
-      }else{
-        html = `<div class="now-notice">지금은 놀 수 있는 시간이 아닙니다</div>`;
-      }
-      box.innerHTML = html;
-    }
-    // 장소
-    const placeDB={
-      '카페':["별다방","커피왕","스윗하우스","청춘아지트"],
-      '공원':["중앙공원","호수공원","솔바람공원","햇살공원"],
-      '오락실':["동탄게임랜드","슈퍼펀","레트로존","펀월드"],
-      '코인노래방':["코인파티","코노팡팡","노래의민족","뮤직존"]
+
+    const category_labels = [
+      '청소년 전용 문화·휴식 공간',
+      '복합 쇼핑몰 & 실내 핫플',
+      '메인 놀이 상권 & 주요 아지트',
+      '도심 공원 & 스포츠 공간',
+      '도서관 & 공부/휴식 공간',
+      '해양 & 주말 야외 나들이',
+      '테마파크, 역사 & 문화 체험'
+    ];
+
+    const category_queries = {
+      '청소년 전용 문화·휴식 공간': '화성시 청소년 문화의집 청소년수련관',
+      '복합 쇼핑몰 & 실내 핫플': '화성시 쇼핑몰 영화관',
+      '메인 놀이 상권 & 주요 아지트': '화성시 오락실 노래방',
+      '도심 공원 & 스포츠 공간': '화성시 공원 체육공원',
+      '도서관 & 공부/휴식 공간': '화성시 도서관',
+      '해양 & 주말 야외 나들이': '화성시 바다 관광지',
+      '테마파크, 역사 & 문화 체험': '화성시 박물관 문화 체험'
     };
-    function renderPlaceCats(){
-      let sel=document.getElementById('catSel');
-      sel.innerHTML="<option value='' hidden>고르기</option>";
-      for(let c in placeDB){ let o=document.createElement("option"); o.value=c; o.textContent=c; sel.appendChild(o);}
-      listPlaces();
+
+    let plans = safeLoadFromStorage(STORAGE_KEY_PLANS, []);
+    let routeState = safeLoadFromStorage(STORAGE_KEY_ROUTE, { start: '', end: '', endAddress: '' });
+    let selectedCategory = category_labels[0];
+    let isPlanFinished = false;
+
+    let currentQuery = '';
+    let currentPage = 1;
+    let canLoadMore = false;
+    let isSearching = false;
+    let searchResults = [];
+    let lastRequestId = 0;
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById(`tab-${tabName}`);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.remove('text-slate-500');
+          btn.classList.add('text-indigo-600', 'font-semibold');
+        } else {
+          btn.classList.remove('text-indigo-600', 'font-semibold');
+          btn.classList.add('text-slate-500', 'font-medium');
+        }
+      });
+
+      if (tabName === 'route') syncRouteInputs();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    function listPlaces(){
-      let sel=document.getElementById('catSel');
-      let val=sel.value;
-      let html="";
-      if(val && placeDB[val]){
-        placeDB[val].forEach((p,i)=>html+=`<div class="place-li">${i+1}. ${p}</div>`);
-      }
-      document.getElementById("rec_placebox").innerHTML=html;
-    }
-    function pickRandomPlace(){
-      let cat=document.getElementById('catSel').value;
-      if(!cat||!placeDB[cat]) return alert("카테고리를 선택하세요.");
-      let arr=placeDB[cat], idx=Math.floor(Math.random()*arr.length);
-      let chosen=arr[idx];
-      document.getElementById("rec_placebox").innerHTML=
-        `<div class="rand-place">추천 장소: ${chosen}</div>`;
-      state.lastCat=cat; state.lastPlace=chosen; saveAll();
-    }
-    // ============ 최적경로 연결 ============
-    function renderRoute(){
-      // 추천된 장소 자동 표시
-      let dest = state.lastPlace||"";
-      document.getElementById('destLabel').textContent = dest ? dest : "(추천 후 목적지가 표시됨)";
-      document.getElementById('startInput').value = "";
-      document.getElementById('routeUrlBox').innerHTML = "";
-    }
-    function showNaverRoute(){
-      let start = document.getElementById("startInput").value.trim();
-      let dest = state.lastPlace||"";
-      if(!dest){
-        alert("놀이 장소 추천에서 먼저 장소를 추천받고 오세요!");
-        moveScreen('place');
+
+    function handleAddPlan(event) {
+      event.preventDefault();
+      const contentInput = document.getElementById('plan-content');
+      const start = document.getElementById('plan-start').value;
+      const end = document.getElementById('plan-end').value;
+      const content = contentInput.value.trim();
+
+      if (content === '끝') {
+        contentInput.value = '';
+        finishPlanInput();
         return;
       }
-      if(!start) { alert("출발 장소를 입력하세요."); return; }
-      // 지도 경로 URL (출발지와 목적지 모두 노출)
-      let url = "https://map.naver.com/v5/directions/"
-        + encodeURIComponent(start) + ",," + "/" + encodeURIComponent(dest) + ",," + "/-/transit";
-      let html = `<a href="${url}" target="_blank" style="color:#1976d2;text-decoration:underline;font-weight:bold;">네이버 지도에서 경로 확인(새 창)</a><br>${url}`;
-      document.getElementById('routeUrlBox').innerHTML = html;
+      if (!content) {
+        showToast('할 일(과목)을 다시 써 주세요.', 'warning');
+        contentInput.focus();
+        return;
+      }
+      if (!start || !end) {
+        showToast('시작 시간과 끝 시간을 모두 입력해 주세요.', 'warning');
+        return;
+      }
+      if (start >= end) {
+        showToast('끝 시간은 시작 시간보다 늦어야 합니다.', 'warning');
+        return;
+      }
+
+      isPlanFinished = false;
+      plans.push({ start, end, content });
+      safeSaveToStorage(STORAGE_KEY_PLANS, plans);
+      contentInput.value = '';
+      contentInput.focus();
+      renderPlansAndFreeTime();
+      showToast(`'${content}' 일정이 추가되었습니다.`, 'success');
     }
-    window.onload = function(){
-      loadAll();
-      renderHome();
-      renderPlaceCats();
-      document.getElementById('userName').addEventListener('change',saveName);
+
+    function finishPlanInput() {
+      isPlanFinished = true;
+      renderPlansAndFreeTime();
+      document.getElementById('schedule-table-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast('일정 입력을 마쳤습니다. 최종 스케줄 표와 놀 수 있는 시간을 확인하세요!', 'success');
     }
+
+    function deletePlan(index) {
+      plans.splice(index, 1);
+      isPlanFinished = false;
+      safeSaveToStorage(STORAGE_KEY_PLANS, plans);
+      renderPlansAndFreeTime();
+      showToast('일정이 삭제되었습니다.', 'info');
+    }
+
+    function clearAllPlans() {
+      plans = [];
+      isPlanFinished = false;
+      safeSaveToStorage(STORAGE_KEY_PLANS, plans);
+      renderPlansAndFreeTime();
+      showToast('모든 일정이 초기화되었습니다.', 'info');
+    }
+
+    function loadSamplePlans() {
+      plans = [
+        { start: '00:00', end: '06:30', content: '오전 잠' },
+        { start: '09:00', end: '16:00', content: '학교' },
+        { start: '16:30', end: '22:00', content: '학원' },
+        { start: '21:00', end: '23:30', content: '숙제' },
+        { start: '23:30', end: '23:59', content: '오후 잠' }
+      ];
+      isPlanFinished = false;
+      safeSaveToStorage(STORAGE_KEY_PLANS, plans);
+      renderPlansAndFreeTime();
+      showToast('예시 일정이 등록되었습니다.', 'success');
+    }
+
+    function renderPlansAndFreeTime() {
+      const tbody = document.getElementById('plan-table-body');
+      const countBadge = document.getElementById('schedule-count-badge');
+      const tableTitle = document.getElementById('schedule-table-title');
+      const finalBadge = document.getElementById('final-badge');
+
+      countBadge.textContent = `총 ${plans.length}건`;
+      if (isPlanFinished) {
+        tableTitle.textContent = '최종 스케줄 표';
+        finalBadge.classList.remove('hidden');
+      } else {
+        tableTitle.textContent = '현재 스케줄 표';
+        finalBadge.classList.add('hidden');
+      }
+
+      if (plans.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="4" class="py-8 text-center text-xs text-slate-400">등록된 일정이 없습니다. 위 입력 칸에 할 일과 시간을 추가해 보세요.</td></tr>
+        `;
+      } else {
+        const indexed = plans.map((item, idx) => ({ ...item, originalIndex: idx }));
+        indexed.sort((a, b) => a.start.localeCompare(b.start));
+        tbody.innerHTML = indexed.map((item, idx) => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 px-3 text-xs font-semibold text-slate-500">${idx + 1}</td>
+            <td class="py-2.5 px-3 font-mono text-xs sm:text-sm font-semibold text-indigo-700">${escapeHtml(item.start)} ~ ${escapeHtml(item.end)}</td>
+            <td class="py-2.5 px-3 font-medium text-slate-800">${escapeHtml(item.content)}</td>
+            <td class="py-2.5 px-3 text-right">
+              <button type="button" onclick="deletePlan(${item.originalIndex})" class="text-xs text-rose-500 hover:text-rose-700 font-medium px-2 py-1 rounded-lg hover:bg-rose-50">삭제</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      const freeSlots = find_free_time(plans);
+      const totalFreeMinutes = freeSlots.reduce((acc, cur) => acc + cur.duration, 0);
+      document.getElementById('home-plan-count').textContent = `${plans.length}개`;
+      document.getElementById('home-free-count').textContent = `${freeSlots.length}개`;
+      document.getElementById('home-free-total').textContent = formatMinutesKorean(totalFreeMinutes);
+
+      const slotHtml = freeSlots.length === 0
+        ? '<p class="text-xs text-slate-400 py-4 text-center">10분 이상 놀 수 있는 빈 시간이 없습니다.</p>'
+        : freeSlots.map(slot => `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-50/70 border border-emerald-200">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="font-mono text-sm font-bold text-slate-900">${slot.start} ~ ${slot.end}</span>
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-white text-emerald-700 border border-emerald-200">${slot.duration}분 여유</span>
+          </div>
+        `).join('');
+
+      document.getElementById('free-time-list').innerHTML = slotHtml;
+      document.getElementById('home-free-list').innerHTML = slotHtml;
+    }
+
+    function formatMinutesKorean(mins) {
+      if (mins <= 0) return '0분';
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (h === 0) return `${m}분`;
+      if (m === 0) return `${h}시간`;
+      return `${h}시간 ${m}분`;
+    }
+
+    function renderCategoryButtons() {
+      const container = document.getElementById('category-buttons');
+      container.innerHTML = category_labels.map(category => {
+        const selected = category === selectedCategory;
+        return `
+          <button type="button" onclick="selectCategory('${escapeAttr(category)}')" class="px-3 py-2 rounded-xl text-xs font-semibold border transition ${selected ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
+            ${escapeHtml(category)}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(category) {
+      if (!Object.prototype.hasOwnProperty.call(category_queries, category)) {
+        showToast('장소 종류를 정확히 선택해 주세요.', 'warning');
+        return;
+      }
+      selectedCategory = category;
+      renderCategoryButtons();
+      document.getElementById('place-query').value = category_queries[category];
+      searchPlaces();
+    }
+
+    async function searchPlaces(event, page = 1) {
+      if (event) event.preventDefault();
+
+      const queryInput = document.getElementById('place-query');
+      const query = queryInput.value.trim();
+
+      if (!query) {
+        showToast('장소 검색어를 입력해 주세요.', 'warning');
+        queryInput.focus();
+        return;
+      }
+      if (query.length > 80) {
+        showToast('검색어는 80자 이내로 입력해 주세요.', 'warning');
+        return;
+      }
+      if (isSearching) return;
+
+      const isNewSearch = page === 1;
+      if (isNewSearch) {
+        currentQuery = query;
+        currentPage = 1;
+        canLoadMore = false;
+        searchResults = [];
+        document.getElementById('place-cards-container').innerHTML = '';
+        document.getElementById('ai-recommend-box').classList.add('hidden');
+      }
+
+      isSearching = true;
+      const requestId = ++lastRequestId;
+      const button = document.getElementById('place-search-button');
+      const moreButton = document.getElementById('load-more-button');
+      button.disabled = true;
+      button.textContent = '검색 중…';
+      moreButton.disabled = true;
+      document.getElementById('place-search-status').textContent = '카카오 장소 정보를 검색하고 있습니다…';
+
+      try {
+        const url = new URL('/api/places', window.location.origin);
+        url.searchParams.set('query', currentQuery);
+        url.searchParams.set('page', String(page));
+
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error('검색 서버에서 읽을 수 없는 응답을 받았습니다.');
+        }
+
+        if (requestId !== lastRequestId) return;
+
+        if (!response.ok || !data || data.ok !== true || !Array.isArray(data.places)) {
+          throw new Error(data && typeof data.error === 'string' ? data.error : '장소 검색에 실패했습니다.');
+        }
+
+        if (isNewSearch) searchResults = [];
+        searchResults = searchResults.concat(data.places);
+        currentPage = page;
+        canLoadMore = Boolean(data.meta && !data.meta.isEnd);
+
+        renderPlaceResults(isNewSearch);
+        document.getElementById('place-search-status').textContent =
+          data.places.length
+            ? `검색어: ${data.query || currentQuery} · ${data.places.length}개 결과를 표시했습니다.`
+            : '검색 결과가 없습니다. 검색어를 바꿔 다시 시도해 보세요.';
+
+        showToast(`${data.places.length}개의 장소를 찾았습니다.`, 'success');
+      } catch (error) {
+        if (requestId !== lastRequestId) return;
+        document.getElementById('place-search-status').textContent = error.message || '장소 검색 중 오류가 발생했습니다.';
+        if (isNewSearch) {
+          document.getElementById('place-list-count').textContent = '0개';
+          document.getElementById('place-cards-container').innerHTML =
+            '<p class="col-span-full py-6 text-center text-sm text-slate-500">검색 결과를 불러오지 못했습니다. 배포 주소와 API 설정을 확인해 주세요.</p>';
+        }
+        showToast(error.message || '장소 검색에 실패했습니다.', 'error');
+      } finally {
+        if (requestId === lastRequestId) {
+          isSearching = false;
+          button.disabled = false;
+          button.textContent = '검색';
+          moreButton.disabled = false;
+        }
+      }
+    }
+
+    function loadNextPlacePage() {
+      if (!canLoadMore || isSearching) return;
+      searchPlaces(null, currentPage + 1);
+    }
+
+    function renderPlaceResults(replace) {
+      const container = document.getElementById('place-cards-container');
+      const countEl = document.getElementById('place-list-count');
+      const titleEl = document.getElementById('place-list-title');
+      const moreButton = document.getElementById('load-more-button');
+
+      titleEl.textContent = `검색 결과: ${currentQuery}`;
+      countEl.textContent = `${searchResults.length}개`;
+
+      const currentBatch = replace ? searchResults : searchResults.slice(15 * (currentPage - 1));
+      const cards = currentBatch.map((place, idx) => {
+        const address = place.address || place.roadAddress || '주소 정보 없음';
+        const info = place.category || '카테고리 정보 없음';
+        const mapUrl = place.mapUrl || makeKakaoMapSearchUrl(place.name);
+        return `
+          <article class="flex flex-col justify-between p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 bg-slate-50/40 transition">
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm">${escapeHtml(place.name || '이름 없는 장소')}</h4>
+              <p class="text-xs text-slate-500 mt-1.5">📍 ${escapeHtml(address)}</p>
+              <p class="text-xs text-slate-700 mt-2 leading-relaxed bg-white p-2.5 rounded-xl border border-slate-100">${escapeHtml(info)}</p>
+              ${place.mapUrl ? `<a href="${escapeAttr(place.mapUrl)}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-emerald-700 underline">카카오맵 장소 상세 보기</a>` : ''}
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <button type="button" onclick="chooseDestinationByIndex(${searchResults.length - currentBatch.length + idx})" class="py-2 px-3 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white text-xs font-semibold transition">목적지로 선택</button>
+              <a href="${escapeAttr(mapUrl)}" target="_blank" rel="noopener noreferrer" class="py-2 px-3 rounded-xl border border-slate-300 bg-white text-center text-xs font-semibold text-slate-700 hover:bg-slate-50">지도에서 보기</a>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      if (replace) container.innerHTML = cards;
+      else container.insertAdjacentHTML('beforeend', cards);
+
+      moreButton.classList.toggle('hidden', !canLoadMore);
+      moreButton.textContent = canLoadMore ? '다음 검색 결과 더 보기' : '검색 결과가 더 없습니다.';
+    }
+
+    function chooseDestinationByIndex(index) {
+      const place = searchResults[index];
+      if (!place) {
+        showToast('선택한 장소 정보를 찾을 수 없습니다.', 'error');
+        return;
+      }
+      chooseDestination(place.name, place.address || place.roadAddress || '');
+      if (place.mapUrl) {
+        document.getElementById('place-map-open-link').href = place.mapUrl;
+        document.getElementById('place-map-frame').src = makeKakaoMapSearchUrl(place.name);
+      }
+    }
+
+    function recommendRandomPlace() {
+      if (searchResults.length === 0) {
+        showToast('먼저 장소를 검색해 주세요.', 'warning');
+        return;
+      }
+      const place = searchResults[Math.floor(Math.random() * searchResults.length)];
+      document.getElementById('ai-rec-name').textContent = place.name || '이름 없는 장소';
+      document.getElementById('ai-rec-gps').textContent = `위치: ${place.address || place.roadAddress || '주소 정보 없음'}`;
+      document.getElementById('ai-rec-info').textContent = `분류: ${place.category || '분류 정보 없음'}`;
+      document.getElementById('ai-rec-select-btn').onclick = () => chooseDestination(place.name, place.address || place.roadAddress || '');
+      document.getElementById('ai-recommend-box').classList.remove('hidden');
+      showToast('검색 결과 중 한 장소를 무작위로 골랐습니다.', 'success');
+    }
+
+    function chooseDestination(placeName, placeAddress) {
+      routeState.end = placeName || '';
+      routeState.endAddress = placeAddress || '';
+      safeSaveToStorage(STORAGE_KEY_ROUTE, routeState);
+      updatePlaceMap(placeName || placeAddress || '');
+      switchTab('route');
+      setTimeout(() => {
+        const startInput = document.getElementById('route-start');
+        if (startInput && !startInput.value.trim()) startInput.focus();
+      }, 250);
+      showToast(`목적지로 '${placeName}'을(를) 입력했습니다. 출발지를 입력해 주세요!`, 'success');
+    }
+
+    function syncRouteInputs() {
+      document.getElementById('route-start').value = routeState.start || '';
+      document.getElementById('route-end').value = routeState.end || '';
+      document.getElementById('route-end-address').textContent =
+        routeState.endAddress ? `선택된 장소 주소: ${routeState.endAddress}` : '';
+      if (routeState.end) updatePlaceMap(routeState.end);
+    }
+
+    function make_naver_direction_url(start, place) {
+      return `https://map.naver.com/v5/directions/${encodeURIComponent(start)}/${encodeURIComponent(place)}/-/transit`;
+    }
+
+    function makeKakaoMapSearchUrl(query) {
+      return `https://map.kakao.com/?q=${encodeURIComponent(query || '화성시')}`;
+    }
+
+    function updatePlaceMap(query) {
+      const url = makeKakaoMapSearchUrl(query || '화성시');
+      document.getElementById('place-map-frame').src = url;
+      document.getElementById('place-map-open-link').href = url;
+    }
+
+    function calculateAndShowRoute() {
+      const start = document.getElementById('route-start').value.trim();
+      const end = document.getElementById('route-end').value.trim();
+
+      if (!end) {
+        showToast('놀이 장소(목적지)는 반드시 입력해야 합니다.', 'warning');
+        document.getElementById('route-end').focus();
+        return;
+      }
+      if (!start) {
+        showToast('출발지도 반드시 입력해야 합니다.', 'warning');
+        document.getElementById('route-start').focus();
+        return;
+      }
+
+      routeState.start = start;
+      routeState.end = end;
+      safeSaveToStorage(STORAGE_KEY_ROUTE, routeState);
+      updatePlaceMap(end);
+
+      const naverUrl = make_naver_direction_url(start, end);
+      showNaverUrl(naverUrl);
+      showToast('장소 미리보기를 갱신했습니다. 실제 경로는 네이버 지도에서 확인하세요.', 'success');
+    }
+
+    function openNaverDirections() {
+      const start = document.getElementById('route-start').value.trim();
+      const end = document.getElementById('route-end').value.trim();
+
+      if (!end) {
+        showToast('놀이 장소(목적지)는 반드시 입력해야 합니다.', 'warning');
+        document.getElementById('route-end').focus();
+        return;
+      }
+      if (!start) {
+        showToast('출발지도 반드시 입력해야 합니다.', 'warning');
+        document.getElementById('route-start').focus();
+        return;
+      }
+
+      routeState.start = start;
+      routeState.end = end;
+      safeSaveToStorage(STORAGE_KEY_ROUTE, routeState);
+
+      const naverUrl = make_naver_direction_url(start, end);
+      showNaverUrl(naverUrl);
+      window.open(naverUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    function showNaverUrl(url) {
+      const box = document.getElementById('naver-url-box');
+      const link = document.getElementById('naver-url-link');
+      link.href = url;
+      link.textContent = url;
+      box.classList.remove('hidden');
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttr(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderPlansAndFreeTime();
+      renderCategoryButtons();
+      document.getElementById('place-query').value = category_queries[selectedCategory];
+      syncRouteInputs();
+      updatePlaceMap(routeState.end || '화성시');
+      document.getElementById('place-list-count').textContent = '검색 전';
+      document.getElementById('place-cards-container').innerHTML =
+        '<p class="col-span-full py-6 text-center text-sm text-slate-500">카테고리를 선택하거나 검색어를 입력해 장소를 찾아보세요.</p>';
+    });
   </script>
 </body>
 </html>
